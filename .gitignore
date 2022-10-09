@@ -1,0 +1,8 @@
+vendor/
+.vscode/
+
+# Compiled source #
+###################
+*.pyc
+*.idea/
+*.DS_Store
