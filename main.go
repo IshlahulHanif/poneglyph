@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/logtrace/logtrace"
-	"github.com/tokopedia/tdk/go/log"
 )
 
 func main() {
@@ -11,15 +11,20 @@ func main() {
 }
 
 func RunTrace(depth int) {
+	logtrace.SetProjectName("logtrace")
+	logtrace.SetIsPrintFromContentRoot(true)
+	logtrace.SetIsPrintFunctionName(true)
+	logtrace.SetIsPrintNewline(true)
+	logtrace.SetIsUseTabSeparator(false)
 	if depth > 0 {
 		RunTrace(depth - 1)
 	} else {
-		logtrace.PrintLogErrorTrace(errors.New("shlh test err"))
+		fmt.Print(logtrace.GetLogErrorTrace(errors.New("test err")))
 	}
 }
 
 func RunTdkErrorLog(depth int) {
-	log.Error("shlh test error")
+	fmt.Errorf("shlh test error\n")
 	if depth > 0 {
 		RunTdkErrorLog(depth - 1)
 	}
