@@ -1,4 +1,4 @@
-module github.com/logtrace
+module github.com/IshlahulHanif/logtrace
 
 go 1.17
 
