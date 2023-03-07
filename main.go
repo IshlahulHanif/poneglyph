@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/logtrace/logtrace"
+	"github.com/IshlahulHanif/logtrace/logtrace"
 )
 
 func main() {
