@@ -1,6 +1,7 @@
-package main
+package logtrace
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -12,6 +13,26 @@ var table = []struct {
 	{input: 1000},
 	{input: 74382},
 	{input: 382399},
+}
+
+func RunTrace(depth int) {
+	SetProjectName("test")
+	SetIsPrintFromContentRoot(true)
+	SetIsPrintFunctionName(true)
+	SetIsPrintNewline(true)
+	SetIsUseTabSeparator(false)
+	if depth > 0 {
+		RunTrace(depth - 1)
+	} else {
+		fmt.Print(GetLogErrorTrace(errors.New("test err")))
+	}
+}
+
+func RunTdkErrorLog(depth int) {
+	fmt.Errorf("shlh test error\n")
+	if depth > 0 {
+		RunTdkErrorLog(depth - 1)
+	}
 }
 
 func BenchmarkRunTrace(b *testing.B) {

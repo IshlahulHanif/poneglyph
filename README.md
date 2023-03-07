@@ -27,7 +27,7 @@ Error: "test err" in main.RunTrace()
 This lib does not actually print the error, only giving users the string which they can print it themselves using their log print lib of choice
 
 ```go
-logtrace.SetProjectName("logtrace")
+logtrace.SetProjectName("test")
 logtrace.SetIsPrintFromContentRoot(true)
 logtrace.SetIsPrintFunctionName(true)
 logtrace.SetIsPrintNewline(true)
