@@ -13,6 +13,7 @@ var (
 	projectName                    string
 	isPrintRelativeFromContentRoot bool
 	isPrintFunctionName            bool
+	isUseSimpleFunctionName        bool
 	isPrintNewline                 bool
 	isUseTabSeparator              bool
 )
@@ -40,6 +41,14 @@ func GetLogErrorTrace(errArg error) (errorTraceResult error) {
 		}
 		callerFunction := runtime.FuncForPC(pc)
 		functionName := callerFunction.Name()
+
+		if isUseSimpleFunctionName && isPrintFunctionName {
+			functionSplit := strings.Split(functionName, "/")
+			if len(functionSplit) > 0 {
+				functionName = functionSplit[len(functionSplit)-1]
+			}
+		}
+
 		functionLines = append(functionLines, functionName)
 
 		// get working dir
@@ -123,6 +132,10 @@ func SetIsPrintFunctionName(isPrint bool) {
 
 func SetIsPrintNewline(isPrint bool) {
 	isPrintNewline = isPrint
+}
+
+func SetIsUseSimpleFunctionName(isUse bool) {
+	isUseSimpleFunctionName = isUse
 }
 
 func SetIsUseTabSeparator(isUse bool) {
