@@ -1,58 +1,71 @@
 package logtrace
 
 import (
+	"errors"
 	"fmt"
-	"runtime/debug"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
 // Log configs
 var (
-	projectName            string
-	isPrintFromContentRoot bool
-	isPrintFunctionName    bool
-	isPrintNewline         bool
-	isUseTabSeparator      bool
+	projectName                    string
+	isPrintRelativeFromContentRoot bool
+	isPrintFunctionName            bool
+	isPrintNewline                 bool
+	isUseTabSeparator              bool
 )
 
-// GetLogErrorTrace TODO: maybe also read at which context this occurs
-func GetLogErrorTrace(err error) string {
-	stackStr := string(debug.Stack()[:])
-	stackSplitNewline := strings.Split(stackStr, "\n")
-
+// GetLogErrorTrace returns a string of error stack depending on the configs
+// if there are any error occurs, it will return the original error
+func GetLogErrorTrace(errArg error) (errorTraceResult error) {
 	var (
-		locationLines   []string
-		functionLines   []string
-		currentFunction = strings.Split(stackSplitNewline[5], "(")[0] + "()"
-		errorLogMessage string
+		locationLines      []string
+		functionLines      []string
+		callerFunctionName string
 	)
-	for i, line := range stackSplitNewline {
-		// bypass this function from stacktrace
-		if i < 5 || len(line) < 1 {
-			continue
+
+	defer func(errArg error) {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered from panic:", r)
+			errorTraceResult = errArg
+		}
+	}(errArg)
+
+	for i := 1; i < 100; i++ {
+		pc, file, line, ok := runtime.Caller(i)
+		if !ok {
+			break
+		}
+		callerFunction := runtime.FuncForPC(pc)
+		functionName := callerFunction.Name()
+		functionLines = append(functionLines, functionName)
+
+		// get working dir
+		cwd, err := filepath.Abs(".")
+		if err != nil {
+			return errArg
 		}
 
-		// filter the lines where it only contains code location
-		if line[0] == '\t' {
-			// removing the memory address & \t
-			location := strings.Split(line, " ")[0]
-
-			// check if trim the content Root name
-			if isPrintFromContentRoot {
-				location = strings.Split(location, projectName)[1]
-			}
-			locationLines = append(locationLines, location[1:])
+		relPath, err := filepath.Rel(cwd, file)
+		if err != nil {
+			return errArg
 		}
 
-		// filter the lines containing function names & detail
-		if isPrintFunctionName {
-			if line[0] != '\t' {
-				// removing the memory address
-				function := strings.Split(line, "(")[0]
-				functionLines = append(functionLines, function)
-			}
+		location := fmt.Sprintf("%s:%d", file, line)
+		if isPrintRelativeFromContentRoot && !strings.Contains(relPath, "../") {
+			location = fmt.Sprintf("%s:%d", relPath, line)
 		}
+		locationLines = append(locationLines, location)
 	}
+
+	// check length
+	if len(locationLines) == 0 || len(functionLines) == 0 {
+		return errArg
+	}
+
+	callerFunctionName = functionLines[0]
 
 	// set lineSeparator between lines
 	var (
@@ -72,21 +85,28 @@ func GetLogErrorTrace(err error) string {
 		lineSeparator = separator + "||"
 	}
 
+	var errorTraceMessage string
 	// assembling error message
-	errorLogMessage += fmt.Sprintf("Error: \"%s\" in %s%s", err.Error(), currentFunction, lineSeparator)
+	errorTraceMessage += fmt.Sprintf("Error: \"%s\" in %s%s", errArg.Error(), callerFunctionName, lineSeparator)
 
 	// different option for printing style
 	if isPrintFunctionName {
 		for i := range locationLines {
-			errorLogMessage += fmt.Sprintf("%s at %s( %s )%s", separator, functionLines[i], locationLines[i], lineSeparator)
+			errorTraceMessage += fmt.Sprintf("%s at %s( %s )%s", separator, functionLines[i], locationLines[i], lineSeparator)
 		}
 	} else {
 		for _, location := range locationLines {
-			errorLogMessage += fmt.Sprintf("%s at %s%s", separator, location, lineSeparator)
+			errorTraceMessage += fmt.Sprintf("%s at %s%s", separator, location, lineSeparator)
 		}
 	}
 
-	return errorLogMessage
+	errorTraceResult = errors.New(errorTraceMessage)
+
+	return errorTraceResult
+}
+
+func PrintLogErrorTrace(errArg error) {
+	fmt.Println(GetLogErrorTrace(errArg))
 }
 
 func SetProjectName(name string) {
@@ -94,7 +114,7 @@ func SetProjectName(name string) {
 }
 
 func SetIsPrintFromContentRoot(isPrint bool) {
-	isPrintFromContentRoot = isPrint
+	isPrintRelativeFromContentRoot = isPrint
 }
 
 func SetIsPrintFunctionName(isPrint bool) {
