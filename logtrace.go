@@ -16,11 +16,21 @@ var (
 	isUseSimpleFunctionName        bool
 	isPrintNewline                 bool
 	isUseTabSeparator              bool
+	isSkipNonProject               bool
+	stackLimit                     int
 )
+
+func init() {
+	stackLimit = 100
+}
 
 // GetLogErrorTrace returns a string of error stack depending on the configs
 // if there are any error occurs, it will return the original error
 func GetLogErrorTrace(errArg error) (errorTraceResult error) {
+	return getLogErrorTraceSkip(errArg, 2)
+}
+
+func getLogErrorTraceSkip(errArg error, skip int) (errorTraceResult error) {
 	var (
 		locationLines      []string
 		functionLines      []string
@@ -34,11 +44,18 @@ func GetLogErrorTrace(errArg error) (errorTraceResult error) {
 		}
 	}(errArg)
 
-	for i := 1; i < 100; i++ {
+	for i := skip; i < stackLimit; i++ {
 		pc, file, line, ok := runtime.Caller(i)
 		if !ok {
 			break
 		}
+
+		if isSkipNonProject {
+			if !strings.Contains(file, projectName) {
+				continue
+			}
+		}
+
 		callerFunction := runtime.FuncForPC(pc)
 		functionName := callerFunction.Name()
 
@@ -115,7 +132,7 @@ func GetLogErrorTrace(errArg error) (errorTraceResult error) {
 }
 
 func PrintLogErrorTrace(errArg error) {
-	fmt.Println(GetLogErrorTrace(errArg))
+	fmt.Println(getLogErrorTraceSkip(errArg, 2))
 }
 
 func SetProjectName(name string) {
@@ -140,6 +157,10 @@ func SetIsUseSimpleFunctionName(isUse bool) {
 
 func SetIsUseTabSeparator(isUse bool) {
 	isUseTabSeparator = isUse
+}
+
+func SetIsSkipNonProject(isSkip bool) {
+	isSkipNonProject = isSkip
 }
 
 const (
