@@ -1,4 +1,4 @@
-package logtrace
+package poneglyph
 
 type (
 	Config struct {
