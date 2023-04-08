@@ -8,22 +8,6 @@ import (
 	"strings"
 )
 
-// Log configs
-var (
-	projectName                    string
-	isPrintRelativeFromContentRoot bool
-	isPrintFunctionName            bool
-	isUseSimpleFunctionName        bool
-	isPrintNewline                 bool
-	isUseTabSeparator              bool
-	isSkipNonProject               bool
-	stackLimit                     int
-)
-
-func init() {
-	stackLimit = 100
-}
-
 // GetLogErrorTrace returns a string of error stack depending on the configs
 // if there are any error occurs, it will return the original error
 func GetLogErrorTrace(errArg error) (errorTraceResult error) {
@@ -134,38 +118,6 @@ func getLogErrorTraceSkip(errArg error, skip int) (errorTraceResult error) {
 func PrintLogErrorTrace(errArg error) {
 	fmt.Println(getLogErrorTraceSkip(errArg, 2))
 }
-
-func SetProjectName(name string) {
-	projectName = name
-}
-
-func SetIsPrintFromContentRoot(isPrint bool) {
-	isPrintRelativeFromContentRoot = isPrint
-}
-
-func SetIsPrintFunctionName(isPrint bool) {
-	isPrintFunctionName = isPrint
-}
-
-func SetIsPrintNewline(isPrint bool) {
-	isPrintNewline = isPrint
-}
-
-func SetIsUseSimpleFunctionName(isUse bool) {
-	isUseSimpleFunctionName = isUse
-}
-
-func SetIsUseTabSeparator(isUse bool) {
-	isUseTabSeparator = isUse
-}
-
-func SetIsSkipNonProject(isSkip bool) {
-	isSkipNonProject = isSkip
-}
-
-const (
-	FourSpace = "   "
-)
 
 // JAVA example
 // Exception in thread "main" java.lang.NullPointerException
