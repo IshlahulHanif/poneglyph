@@ -1,4 +1,4 @@
-# Logtrace
+# Poneglyph
 Java-style logtrace printer for Golang
 
 Do you find it tiring to always print your error on every function?
