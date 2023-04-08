@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-// GetLogErrorTrace returns a string of error stack depending on the configs
-// if there are any error occurs, it will return the original error
-func GetLogErrorTrace(errArg error) (errorTraceResult error) {
-	return getLogErrorTraceSkip(errArg, 2)
-}
-
 func getLogErrorTraceSkip(errArg error, skip int) (errorTraceResult error) {
 	var (
 		locationLines      []string
@@ -113,10 +107,6 @@ func getLogErrorTraceSkip(errArg error, skip int) (errorTraceResult error) {
 	errorTraceResult = errors.New(errorTraceMessage)
 
 	return errorTraceResult
-}
-
-func PrintLogErrorTrace(errArg error) {
-	fmt.Println(getLogErrorTraceSkip(errArg, 2))
 }
 
 // JAVA example
