@@ -12,7 +12,3 @@ type (
 		stackLimit                     int
 	}
 )
-
-const (
-	FourSpace = "   "
-)

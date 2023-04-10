@@ -1,0 +1,5 @@
+package poneglyph
+
+const (
+	FourSpace = "   "
+)
