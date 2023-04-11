@@ -39,6 +39,8 @@ func BenchmarkRunTrace(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		RunTrace(10)
 	}
+	err := errors.New("asdasd")
+	err.Error()
 }
 
 func BenchmarkRunTraceWithTable(b *testing.B) {

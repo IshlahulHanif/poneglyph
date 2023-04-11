@@ -3,7 +3,6 @@ package poneglyph
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -34,34 +33,18 @@ func getLogErrorTraceSkip(errArg error, skip int) (errorTraceResult error) {
 			}
 		}
 
-		callerFunction := runtime.FuncForPC(pc)
-		functionName := callerFunction.Name()
+		functionName, err := getFunctionName(pc)
+		if err != nil {
+			return
+		}
 
-		if isUseSimpleFunctionName && isPrintFunctionName {
-			functionSplit := strings.Split(functionName, "/")
-			if len(functionSplit) > 0 {
-				functionName = functionSplit[len(functionSplit)-1]
-			}
+		locationLine, err := getLocationLines(file, line)
+		if err != nil {
+			return
 		}
 
 		functionLines = append(functionLines, functionName)
-
-		// get working dir
-		cwd, err := filepath.Abs(".")
-		if err != nil {
-			return errArg
-		}
-
-		relPath, err := filepath.Rel(cwd, file)
-		if err != nil {
-			return errArg
-		}
-
-		location := fmt.Sprintf("%s:%d", file, line)
-		if isPrintRelativeFromContentRoot && !strings.Contains(relPath, "../") {
-			location = fmt.Sprintf("%s:%d", relPath, line)
-		}
-		locationLines = append(locationLines, location)
+		locationLines = append(locationLines, locationLine)
 	}
 
 	// check length
