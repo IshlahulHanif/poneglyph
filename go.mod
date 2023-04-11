@@ -1,4 +1,4 @@
-module github.com/IshlahulHanif/logtrace
+module github.com/IshlahulHanif/poneglyph
 
 go 1.20
 
