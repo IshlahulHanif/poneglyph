@@ -11,8 +11,14 @@ type (
 		isSkipNonProject               bool
 		stackLimit                     int
 	}
-)
 
-const (
-	FourSpace = "   "
+	ErrorTrace struct {
+		// base error
+		err error
+
+		// traces
+		locationLines []string
+		functionLines []string
+		messages      []string
+	}
 )

@@ -12,6 +12,7 @@ var (
 	stackLimit                     int
 )
 
+// TODO: set config should only be called once
 func SetConfig(config Config) {
 	projectName = config.projectName
 	isPrintRelativeFromContentRoot = config.isPrintRelativeFromContentRoot
