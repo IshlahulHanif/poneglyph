@@ -1,20 +1,31 @@
 package poneglyph
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 )
 
 func (l *ErrorTrace) Error() string {
-	if l.err == nil {
+	if l == nil || l.err == nil {
 		return ""
 	}
 
 	return l.err.Error()
 }
 
-func (l *ErrorTrace) Trace() {
+func (l *ErrorTrace) Trace(messages ...string) {
+	if l == nil || l.err == nil {
+		return
+	}
+
 	l.doTrace(2)
+
+	var message string
+	if len(messages) > 0 {
+		message = fmt.Sprint(messages)
+	}
+	l.messages = append(l.messages, message)
 }
 
 func (l *ErrorTrace) doTrace(skip int) {
@@ -102,7 +113,32 @@ func Trace(err error, messages ...string) *ErrorTrace {
 		return nil
 	}
 
-	errorTrace, ok := err.(*ErrorTrace)
+	var errorTrace *ErrorTrace
+	ok := errors.As(err, &errorTrace)
+	if !ok {
+		errorTrace = &ErrorTrace{err: err}
+	}
+
+	errorTrace.doTrace(2)
+
+	var message string
+	if len(messages) > 0 {
+		message = fmt.Sprint(messages)
+	}
+	errorTrace.messages = append(errorTrace.messages, message)
+
+	return errorTrace
+}
+
+func TraceStr(errStr string, messages ...string) *ErrorTrace {
+	if len(errStr) == 0 {
+		return nil
+	}
+
+	err := errors.New(errStr)
+
+	var errorTrace *ErrorTrace
+	ok := errors.As(err, &errorTrace)
 	if !ok {
 		errorTrace = &ErrorTrace{err: err}
 	}
@@ -119,7 +155,12 @@ func Trace(err error, messages ...string) *ErrorTrace {
 }
 
 func GetErrorLogMessage(err error) string {
-	errorTrace, ok := err.(*ErrorTrace)
+	if err == nil {
+		return ""
+	}
+
+	var errorTrace *ErrorTrace
+	ok := errors.As(err, &errorTrace)
 	if !ok {
 		return err.Error()
 	}
